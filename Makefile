@@ -8,6 +8,8 @@ out/pytest_api_examples.md: ${NOTEBOOK}
 		--to markdown \
 		--output=$@ \
 		$<
+	docker-compose run --rm prettier \
+		npx prettier --write /mnt/
 
 up:
 	poetry run jupyter-notebook ${NOTEBOOK}
