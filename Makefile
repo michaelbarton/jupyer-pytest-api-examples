@@ -6,10 +6,12 @@ out/pytest_api_examples.md: ${NOTEBOOK}
 	mkdir -p $(dir $@)
 	poetry run jupyter nbconvert \
 		--to markdown \
-		--output=$@ \
+		--output-dir=$(dir $@) \
 		$<
 	docker-compose run --rm prettier \
-		npx prettier --write /mnt/pytest_api_examples.md
+		npx prettier \
+			--write /mnt/pytest_api_examples.md \
+			--prose-wrap always
 
 up:
 	poetry run jupyter-notebook ${NOTEBOOK}
