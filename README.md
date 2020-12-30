@@ -1,2 +1,8 @@
-# jupyer-pytest-api-examples
-Jupyter notebook with pytest api examples
+# Pytest API with examples
+
+Jupyter notebook with pytest API examples.
+
+
+## Makefile
+
+- `up`: Starts the notebook

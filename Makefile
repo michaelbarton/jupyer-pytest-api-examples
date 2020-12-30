@@ -1,6 +1,6 @@
 # Makefile to convert notebook into a blog post
 
-NOTEBOOK = pytest_api_examples.ipynb
+NOTEBOOK = src/pytest_api_examples.ipynb
 
 out/pytest_api_examples.md: ${NOTEBOOK}
 	mkdir -p $(dir $@)
@@ -9,8 +9,10 @@ out/pytest_api_examples.md: ${NOTEBOOK}
 		--output=$@ \
 		$<
 	docker-compose run --rm prettier \
-		npx prettier --write /mnt/
+		npx prettier --write /mnt/pytest_api_examples.md
 
 up:
 	poetry run jupyter-notebook ${NOTEBOOK}
 
+clean:
+	rm -r out
