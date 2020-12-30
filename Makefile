@@ -2,7 +2,7 @@
 
 NOTEBOOK = src/pytest_api_examples.ipynb
 
-out/pytest_api_examples.md: ${NOTEBOOK} src/jupyter_nbconvert_config.py
+out/pytest_api_examples.md: ${NOTEBOOK} src/jupyter_nbconvert_config.py fmt
 	mkdir -p $(dir $@)
 	poetry run jupyter nbconvert \
 		--output-dir=$(dir $@) \
@@ -15,6 +15,9 @@ out/pytest_api_examples.md: ${NOTEBOOK} src/jupyter_nbconvert_config.py
 
 up:
 	poetry run jupyter-notebook ${NOTEBOOK}
+
+fmt:
+	poetry run jupytext --pipe black src/pytest_api_examples.ipynb
 
 clean:
 	rm -r out
