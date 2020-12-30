@@ -2,11 +2,11 @@
 
 NOTEBOOK = src/pytest_api_examples.ipynb
 
-out/pytest_api_examples.md: ${NOTEBOOK}
+out/pytest_api_examples.md: ${NOTEBOOK} src/jupyter_nbconvert_config.py
 	mkdir -p $(dir $@)
 	poetry run jupyter nbconvert \
-		--to markdown \
 		--output-dir=$(dir $@) \
+		--config=src/jupyter_nbconvert_config.py \
 		$<
 	docker-compose run --rm prettier \
 		npx prettier \
