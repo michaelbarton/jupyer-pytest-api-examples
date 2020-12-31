@@ -5,7 +5,7 @@ jupyter:
     text_representation:
       extension: .md
       format_name: markdown
-      format_version: '1.2'
+      format_version: "1.2"
       jupytext_version: 1.8.0
   kernelspec:
     display_name: Python 3
@@ -59,7 +59,6 @@ def fetch_file_from_s3() -> pathlib.Path:
     return pathlib.Path(loc)
 ```
 
-
 I use pytest in most python projects, and I've had a feeling that I haven't been
 been using most of the features it provides, since I tend to only use
 `@pytest.mark` from the entire API. I spent some time reading through the pytest
@@ -90,13 +89,12 @@ most are `[tmp_path][]` and `[tmp_path_factory][]` demonstrated below.
 %%run_pytest[clean] -qq -s --cache-clear
 
 def test_with_tmp_path(tmp_path: pathlib.Path):
-		"""The `tmp_path` fixture provides a temporary directory."""
+    """The `tmp_path` fixture provides a temporary directory."""
     assert tmp_path.isdir()
 
 def test_with_tmp_path_factory(tmp_path_factory: pytest.TempPathFactory):
-		"""The `tmp_path_factory` fixture provides a factory for directories."""
-	assert tmp_path_factory.mktemp("temp_dir").isdir()
-
+    """The `tmp_path_factory` fixture provides a factory for directories."""
+    assert tmp_path_factory.mktemp("temp_dir").isdir()
 
 ```
 
@@ -133,7 +131,6 @@ def test_fixture_teardown_1(example_data_file_with_teardown: pathlib.Path):
 def test_fixture_teardown_2(example_data_file_with_teardown: pathlib.Path):
     assert example_data_file_with_teardown.exists()
 ```
-
 
 ## Scoping fixtures
 
@@ -176,7 +173,6 @@ def test_fixture_session_teardown_2(example_data_file_for_session: pathlib.Path)
     assert example_data_file_for_session.exists()
 ```
 
-
 ## Parameterising fixtures
 
 If you find yourself using the same `pytest.mark.parametrize` multiple times in
@@ -202,7 +198,6 @@ def test_cli_app(invalid_file):
     assert run_cli(invalid_file) == 1
     print("Test passes checking for input file: {}".format(invalid_file))
 ```
-
 
 ## Break up long serial tests
 
@@ -236,7 +231,6 @@ def test_long_e2e_test(tmp_path: pathlib.Path):
     assert averages_data_file.exists()
     assert averages_data_file.read_text()
 ```
-
 
 A problem with test structure above is that running a lot of tests in serial
 means the later tests won't execute if any of the earlier ones fail which can
@@ -290,7 +284,6 @@ def test_averates_data_file(computation_data: typing.Dict[str, pathlib.Path]):
     assert averages_file.read_text()
 ```
 
-
 ## Use LineMatcher for testing large text
 
 The `LineMatcher` helper class provides methods that can reduce boiler plate
@@ -322,7 +315,6 @@ def test_large_text():
     # Check lines don't exist with a regex
     matcher.no_fnmatch_line(["And looked down two as far as I could"])
 ```
-
 
 ## Caching large files or computation
 

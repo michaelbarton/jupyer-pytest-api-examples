@@ -21,11 +21,11 @@ up: sync
 preview: ${BUILD}
 	poetry run python -m rich.markdown $<
 
-fmt:
-	poetry run jupytext --pipe black src/pytest_api_examples.ipynb
+fmt: ${NOTEBOOK}
+	poetry run blacken-docs $<
 	docker-compose run --rm prettier \
 		npx prettier \
-			--write /mnt/pytest_api_examples.md \
+			--write "/mnt/*.md" \
 			--prose-wrap always
 
 clean:

@@ -92,6 +92,17 @@ colorama = ["colorama (>=0.4.3)"]
 d = ["aiohttp (>=3.3.2)", "aiohttp-cors"]
 
 [[package]]
+name = "blacken-docs"
+version = "1.9.1"
+description = "Run `black` on python code blocks in documentation files"
+category = "main"
+optional = false
+python-versions = ">=3.6.1"
+
+[package.dependencies]
+black = ">=19.3b0"
+
+[[package]]
 name = "bleach"
 version = "3.2.1"
 description = "An easy safelist-based HTML-sanitizing tool."
@@ -983,7 +994,7 @@ notebook = ">=4.4.1"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "142b55fb28f51b5ac312b77b435a75ff9acbf477f297acc7bb4993fc66866373"
+content-hash = "5d1b161deb5f331b847fb2baa5c6448dad3c080537d756c59a0837be9bbf91b9"
 
 [metadata.files]
 appdirs = [
@@ -1032,6 +1043,10 @@ backcall = [
 ]
 black = [
     {file = "black-20.8b1.tar.gz", hash = "sha256:1c02557aa099101b9d21496f8a914e9ed2222ef70336404eeeac8edba836fbea"},
+]
+blacken-docs = [
+    {file = "blacken_docs-1.9.1-py2.py3-none-any.whl", hash = "sha256:a1ea11e8e25f1c14e28de8cc95e82d8ea8a48de9a4acb469a89e1fe9a4090dfb"},
+    {file = "blacken_docs-1.9.1.tar.gz", hash = "sha256:a22236e3ecedbf03eb714f9425de5415bda623ec2e9266fd3cbbd21208505b47"},
 ]
 bleach = [
     {file = "bleach-3.2.1-py2.py3-none-any.whl", hash = "sha256:9f8ccbeb6183c6e6cddea37592dfb0167485c1e3b13b3363bc325aa8bda3adbd"},
