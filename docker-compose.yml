@@ -4,4 +4,4 @@ services:
   prettier:
     build: .
     volumes:
-      - ./out:/mnt:rw
+      - ./src:/mnt:rw

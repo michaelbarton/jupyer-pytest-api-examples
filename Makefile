@@ -3,18 +3,19 @@
 NOTEBOOK = src/pytest_api_examples.ipynb
 BUILD = out/pytest_api_examples.md
 
-${BUILD}: ${NOTEBOOK} src/jupyter_nbconvert_config.py fmt
+build: ${BUILD}
+
+${BUILD}: ${NOTEBOOK} src/jupyter_nbconvert_config.py sync
 	mkdir -p $(dir $@)
 	poetry run jupyter nbconvert \
 		--output-dir=$(dir $@) \
 		--config=src/jupyter_nbconvert_config.py \
 		$<
-	docker-compose run --rm prettier \
-		npx prettier \
-			--write /mnt/pytest_api_examples.md \
-			--prose-wrap always
 
-up:
+sync: fmt
+	poetry run jupytext --sync ${NOTEBOOK}
+
+up: sync
 	poetry run jupyter-notebook ${NOTEBOOK}
 
 preview: ${BUILD}
@@ -22,6 +23,10 @@ preview: ${BUILD}
 
 fmt:
 	poetry run jupytext --pipe black src/pytest_api_examples.ipynb
+	docker-compose run --rm prettier \
+		npx prettier \
+			--write /mnt/pytest_api_examples.md \
+			--prose-wrap always
 
 clean:
 	rm -r out

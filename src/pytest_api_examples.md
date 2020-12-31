@@ -65,17 +65,17 @@ haven't been been using most of the features it provides, since I tend to only
 use `@pytest.mark` from the entire API. I spent some time reading through the
 pytest documentation and playing with some examples in the source [pytest
 jupyter notebook][] to get more familiarity with what's possible. After a few
-hours of playing around with pytest, realised there was a lot of functionality
-I was missing. Read below for some of the examples. Most of this is just a
+hours of playing around with pytest, realised there was a lot of functionality I
+was missing. Read below for some of the examples. Most of this is just a
 reconstitution of whats in the [pytest documentation][] for my own
 self-learning. Additionally there's useful videos, and plugins on the [awesome
 pytest][] GitHub repository.
 
-[pytest jupyter notebook]: https://github.com/michaelbarton/jupyer-pytest-api-examples
+[pytest jupyter notebook]:
+  https://github.com/michaelbarton/jupyer-pytest-api-examples
 [pytest documentation]: https://docs.pytest.org/en/stable/example/index.html
 [awesome pytest]: https://github.com/augustogoulart/awesome-pytest
 
-<!-- #region -->
 ## Using fixtures to teardown
 
 Documentation: [pytest fixture][], [fixture finalization][]
@@ -84,12 +84,14 @@ If you want to do clean up on the fixture after it's used, you can use `yield`
 instead of `return`. The fixture will then run the code defined after the
 `yield` statement, after the fixture-using test returns.
 
-[fixture finalization]: https://docs.pytest.org/en/latest/fixture.html#teardown-cleanup-aka-fixture-finalization
-[pytest fixture]: https://docs.pytest.org/en/latest/reference.html#pytest-fixture
-<!-- #endregion -->
+[fixture finalization]:
+  https://docs.pytest.org/en/latest/fixture.html#teardown-cleanup-aka-fixture-finalization
+[pytest fixture]:
+  https://docs.pytest.org/en/latest/reference.html#pytest-fixture
 
 ```python
 %%run_pytest[clean] -qq -s --cache-clear
+
 
 @pytest.fixture
 def example_data_file_with_teardown() -> typing.Generator[pathlib.Path, None, None]:
@@ -113,16 +115,17 @@ def test_fixture_teardown_2(example_data_file_with_teardown: pathlib.Path):
 
 Documentation: [scope sharing][]
 
-[scope sharing]: https://docs.pytest.org/en/latest/fixture.html#scope-sharing-fixtures-across-classes-modules-packages-or-session
+[scope sharing]:
+  https://docs.pytest.org/en/latest/fixture.html#scope-sharing-fixtures-across-classes-modules-packages-or-session
 
 In the example above the code after the `yield` runs every time the fixture is
 used, this might be inappropriate if the fixture computationally expensive. An
 alternative to caching the result (described below), would be to set the scope
 of the fixture with `pytest.fixture(scope=...)`. For example
 `pytest.fixture(scope="session")` will run only once for the enture pytest
-session. Possible values for `scope=...` are `["class", "module", "package",
-"session"]`. A `Callable` can also be passed which will be evaluated once, see
-[dynamic scope][].
+session. Possible values for `scope=...` are
+`["class", "module", "package", "session"]`. A `Callable` can also be passed
+which will be evaluated once, see [dynamic scope][].
 
 [dynamic scope]: https://docs.pytest.org/en/latest/fixture.html#dynamic-scope
 
@@ -176,6 +179,7 @@ def test_cli_app(invalid_file):
     print("Test passes checking for input file: {}".format(invalid_file))
 ```
 
+
 ## Break up long serial tests
 
 ```python
@@ -208,6 +212,7 @@ def test_long_e2e_test(tmp_path: pathlib.Path):
     assert averages_data_file.exists()
     assert averages_data_file.read_text()
 ```
+
 
 A problem with test structure above is that running a lot of tests in serial
 means the later tests won't execute if any of the earlier ones fail which can
@@ -301,8 +306,8 @@ Documentation: [Cache config][cache]
 
 Pytest allows caching expensive operations between test runs such as large
 computation or fetching data. This can used prevent expensive computations from
-slowing down tests. The cache can be cleared using the flag: `pytest
---cache-clear`.
+slowing down tests. The cache can be cleared using the flag:
+`pytest --cache-clear`.
 
 To access the cache the `pytestconfig` fixture needs to be in arguments to a
 fixture, this will be an instance of [`_pytest.config.Config`][config_class].
@@ -310,7 +315,8 @@ The caveat to using the `get/set` methods is they have to be JSON serialisable,
 so in the examples below I covert `pathlib.Path` objects back and forth to
 strings to serialise into the cache.
 
-[cache]: https://docs.pytest.org/en/stable/cache.html#the-new-config-cache-object
+[cache]:
+  https://docs.pytest.org/en/stable/cache.html#the-new-config-cache-object
 [config_class]: https://docs.pytest.org/en/latest/reference.html#id35
 
 ```python
