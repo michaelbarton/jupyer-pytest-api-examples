@@ -70,6 +70,13 @@ def fetch_file_from_s3() -> pathlib.Path:
 ```
 
 
+---
+  kind: article
+  title: Pytest API Examples
+  date: "2021-01-04 00:00 GMT"
+---
+
+
 I use pytest in most python projects, and I've had a feeling that I haven't been
 been using most of the features it provides, since I tend to only use
 `@pytest.mark` from the API. I spent some time reading through the pytest

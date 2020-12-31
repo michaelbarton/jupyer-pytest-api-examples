@@ -1,16 +1,16 @@
 # Makefile to convert notebook into a blog post
 
 NOTEBOOK = src/pytest_api_examples.ipynb
-BUILD = out/pytest_api_examples.md
+BUILD = blog/source/content/tools/pytest-examples.mkd
 
 build: ${BUILD}
 
 ${BUILD}: ${NOTEBOOK} src/jupyter_nbconvert_config.py sync
 	mkdir -p $(dir $@)
 	poetry run jupyter nbconvert \
-		--output-dir=$(dir $@) \
+		--stdout \
 		--config=src/jupyter_nbconvert_config.py \
-		$<
+		> $@
 
 sync: fmt
 	poetry run jupytext --sync ${NOTEBOOK}
