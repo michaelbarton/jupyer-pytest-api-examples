@@ -155,7 +155,7 @@ In the example above the code after the `yield` runs every time the fixture is
 used, this might be inappropriate if the fixture computationally expensive. An
 alternative to caching the result (described below), would be to set the scope
 of the fixture with `pytest.fixture(scope=...)`. For example
-`pytest.fixture(scope="session")` will run only once for the enture pytest
+`pytest.fixture(scope="session")` will run only once for the entire pytest
 session. Possible values for `scope=...` are
 `["class", "module", "package", "session"]`. A `Callable` can also be passed
 which will be evaluated once, see [dynamic scope][].
@@ -216,7 +216,7 @@ def test_cli_app(invalid_file):
 ## Break up expensive serial tests
 
 There can be scenarios in end to end tests where it's necessary to test the
-output artifact with multiple assertions. An example of this might be:
+output artefact with multiple assertions. An example of this might be:
 
 ```python tags=["remove_output"]
 %%run_pytest[clean] -qq -s --cache-clear
