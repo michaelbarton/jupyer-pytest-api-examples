@@ -18,7 +18,7 @@ up:
 	poetry run jupyter-notebook ${NOTEBOOK}
 
 preview: ${BUILD}
-	poetry run python -m rich.markdown $< | less
+	poetry run python -m rich.markdown $<
 
 fmt:
 	poetry run jupytext --pipe black src/pytest_api_examples.ipynb
