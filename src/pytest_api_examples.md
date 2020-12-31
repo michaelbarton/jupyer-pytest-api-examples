@@ -60,13 +60,13 @@ def fetch_file_from_s3() -> pathlib.Path:
 ```
 
 
-I use pytest in almost all python projects, and I've had a feeling that I
-haven't been been using most of the features it provides, since I tend to only
-use `@pytest.mark` from the entire API. I spent some time reading through the
-pytest documentation and playing with some examples in the source [pytest
-jupyter notebook][] to get more familiarity with what's possible. After a few
-hours of playing around with pytest, realised there was a lot of functionality I
-was missing. Read below for some of the examples. Most of this is just a
+I use pytest in most python projects, and I've had a feeling that I haven't been
+been using most of the features it provides, since I tend to only use
+`@pytest.mark` from the entire API. I spent some time reading through the pytest
+documentation and playing with some examples in the source [pytest jupyter
+notebook][] to get more familiarity with what's possible. After a few hours of
+playing around with pytest, realised there was a lot of functionality I was
+missing. Read below for some of the examples. Most of this is just a
 reconstitution of whats in the [pytest documentation][] for my own
 self-learning. Additionally there's useful videos, and plugins on the [awesome
 pytest][] GitHub repository.
@@ -75,6 +75,30 @@ pytest][] GitHub repository.
   https://github.com/michaelbarton/jupyer-pytest-api-examples
 [pytest documentation]: https://docs.pytest.org/en/stable/example/index.html
 [awesome pytest]: https://github.com/augustogoulart/awesome-pytest
+
+## Pytest Fixtures
+
+Fixtures are a large part of the pytest API, and the part I was least familiar
+with. Fixtures are used in pytest tests by including them as parameters to test
+functions. The pytest API comes with a few builtin fixtures, ones I like the
+most are `[tmp_path][]` and `[tmp_path_factory][]` demonstrated below.
+
+[tmp_path_factory]:
+  https://docs.pytest.org/en/stable/tmpdir.html#tmp-path-factory-example
+
+```python
+%%run_pytest[clean] -qq -s --cache-clear
+
+def test_with_tmp_path(tmp_path: pathlib.Path):
+		"""The `tmp_path` fixture provides a temporary directory."""
+    assert tmp_path.isdir()
+
+def test_with_tmp_path_factory(tmp_path_factory: pytest.TempPathFactory):
+		"""The `tmp_path_factory` fixture provides a factory for directories."""
+	assert tmp_path_factory.mktemp("temp_dir").isdir()
+
+
+```
 
 ## Using fixtures to teardown
 
