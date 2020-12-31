@@ -8,8 +8,9 @@ build: ${BUILD}
 ${BUILD}: ${NOTEBOOK} src/jupyter_nbconvert_config.py sync
 	mkdir -p $(dir $@)
 	poetry run jupyter nbconvert \
-		--stdout \
 		--config=src/jupyter_nbconvert_config.py \
+		--stdout \
+		$< \
 		> $@
 
 sync: fmt
