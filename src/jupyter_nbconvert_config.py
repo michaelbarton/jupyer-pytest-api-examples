@@ -1,8 +1,14 @@
+import typing
+
+import nbformat
+from nbconvert.preprocessors import base
+
+
 # Configuration file for jupyter-nbconvert.
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Application(SingletonConfigurable) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## This is an application.
 
 ## The date format used by logging formatters for %(asctime)s
@@ -26,9 +32,9 @@
 #  Default: False
 # c.Application.show_config_json = False
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # JupyterApp(Application) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Base class for Jupyter applications
 
 ## Answer yes to any prompts.
@@ -67,9 +73,9 @@
 #  See also: Application.show_config_json
 # c.JupyterApp.show_config_json = False
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # NbConvertApp(JupyterApp) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## This application is used to convert notebook files (*.ipynb) to various other
 #  formats.
 #
@@ -92,7 +98,7 @@
 #  'script', 'slides', 'webpdf'] or a dotted object name that represents the
 #  import path for an `Exporter` class
 #  Default: ''
-c.NbConvertApp.export_format = 'markdown'
+c.NbConvertApp.export_format = "markdown"
 
 ## read a single notebook from stdin.
 #  Default: False
@@ -159,9 +165,9 @@ c.NbConvertApp.export_format = 'markdown'
 #  Default: 'FilesWriter'
 # c.NbConvertApp.writer_class = 'FilesWriter'
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # NbConvertBase(LoggingConfigurable) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Global configurable class for shared config
 #
 #  Useful for display data priority that might be used by many transformers
@@ -176,9 +182,9 @@ c.NbConvertApp.export_format = 'markdown'
 #  Default: ['text/html', 'application/pdf', 'text/latex', 'image/svg+xml', 'image/png', 'image/jpeg', 'text/markdown', 'text/plain']
 # c.NbConvertBase.display_data_priority = ['text/html', 'application/pdf', 'text/latex', 'image/svg+xml', 'image/png', 'image/jpeg', 'text/markdown', 'text/plain']
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Exporter(LoggingConfigurable) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Class containing methods that sequentially run a list of preprocessors on a
 #  NotebookNode object and then return the modified NotebookNode object and
 #  accompanying resources dict.
@@ -188,8 +194,33 @@ c.NbConvertApp.export_format = 'markdown'
 #  Default: ['nbconvert.preprocessors.TagRemovePreprocessor', 'nbconvert.preprocessors.RegexRemovePreprocessor', 'nbconvert.preprocessors.ClearOutputPreprocessor', 'nbconvert.preprocessors.ExecutePreprocessor', 'nbconvert.preprocessors.coalesce_streams', 'nbconvert.preprocessors.SVG2PDFPreprocessor', 'nbconvert.preprocessors.LatexPreprocessor', 'nbconvert.preprocessors.HighlightMagicsPreprocessor', 'nbconvert.preprocessors.ExtractOutputPreprocessor', 'nbconvert.preprocessors.ClearMetadataPreprocessor']
 # c.Exporter.default_preprocessors = ['nbconvert.preprocessors.TagRemovePreprocessor', 'nbconvert.preprocessors.RegexRemovePreprocessor', 'nbconvert.preprocessors.ClearOutputPreprocessor', 'nbconvert.preprocessors.ExecutePreprocessor', 'nbconvert.preprocessors.coalesce_streams', 'nbconvert.preprocessors.SVG2PDFPreprocessor', 'nbconvert.preprocessors.LatexPreprocessor', 'nbconvert.preprocessors.HighlightMagicsPreprocessor', 'nbconvert.preprocessors.ExtractOutputPreprocessor', 'nbconvert.preprocessors.ClearMetadataPreprocessor']
 
+from rich import inspect
+
+
+class RemoveMagicPreprocessor(base.Preprocessor):
+    """Remove magic from cell."""
+
+    def preprocess_cell(
+        self, cell: nbformat.NotebookNode, resources: typing.Dict[str, typing.Any], index: int
+    ) -> typing.Tuple[nbformat.NotebookNode, typing.Dict[str, typing.Any]]:
+        """Remove magic from cell."""
+
+        if cell["cell_type"] == "code":
+            if "%%run_pytest" in cell["source"]:
+                cell["source"] = cell["source"].split("\n",2)[2]
+
+        return cell, resources
+
+
+c.RemoveMagicPreprocessor.enabled = True
+
+
 c.TagRemovePreprocessor.remove_cell_tags = ("remove_cell",)
-c.Exporter.default_preprocessors = ['nbconvert.preprocessors.TagRemovePreprocessor']
+c.TagRemovePreprocessor.remove_all_outputs_tags = ("remove_output",)
+c.Exporter.default_preprocessors = [
+    "nbconvert.preprocessors.TagRemovePreprocessor",
+    RemoveMagicPreprocessor,
+]
 
 ## Disable this exporter (and any exporters inherited from it).
 #  Default: True
@@ -203,9 +234,9 @@ c.Exporter.default_preprocessors = ['nbconvert.preprocessors.TagRemovePreprocess
 #  Default: []
 # c.Exporter.preprocessors = []
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # TemplateExporter(Exporter) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Exports notebooks into other file formats.  Uses Jinja 2 templating engine to
 #  output new formats.  Inherit from this class if you are creating a new
 #  template type along with new filters/preprocessors.  If the filters/
@@ -250,7 +281,7 @@ c.Exporter.default_preprocessors = ['nbconvert.preprocessors.TagRemovePreprocess
 ## This allows you to exclude code cell outputs from all templates if set to
 #  True.
 #  Default: False
-c.TemplateExporter.exclude_output = True
+# c.TemplateExporter.exclude_output = True
 
 ## This allows you to exclude output prompts from all templates if set to True.
 #  Default: False
@@ -300,9 +331,9 @@ c.TemplateExporter.exclude_output = True
 #  Default: ['.']
 # c.TemplateExporter.template_paths = ['.']
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # ASCIIDocExporter(TemplateExporter) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Exports to an ASCIIDoc document (.asciidoc)
 
 ## List of preprocessors available by default, by name, namespace,
@@ -382,9 +413,9 @@ c.TemplateExporter.exclude_output = True
 #  See also: TemplateExporter.template_paths
 # c.ASCIIDocExporter.template_paths = ['.']
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # HTMLExporter(TemplateExporter) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Exports a basic HTML document.  This exporter assists with the export of HTML.
 #  Inherit from it if you are writing your own HTML template and need custom
 #  preprocessors/filters.  If you don't need custom preprocessors/ filters, just
@@ -491,9 +522,9 @@ c.TemplateExporter.exclude_output = True
 #  Default: 'light'
 # c.HTMLExporter.theme = 'light'
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # LatexExporter(TemplateExporter) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Exports to a Latex template.  Inherit from this class if your template is
 #  LaTeX based and you need custom transformers/filters. If you don't need custom
 #  transformers/filters, just change the  'template_file' config option.  Place
@@ -576,9 +607,9 @@ c.TemplateExporter.exclude_output = True
 #  See also: TemplateExporter.template_paths
 # c.LatexExporter.template_paths = ['.']
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # MarkdownExporter(TemplateExporter) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Exports to a markdown document (.md)
 
 ## List of preprocessors available by default, by name, namespace,
@@ -658,9 +689,9 @@ c.TemplateExporter.exclude_output = True
 #  See also: TemplateExporter.template_paths
 # c.MarkdownExporter.template_paths = ['.']
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # NotebookExporter(Exporter) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Exports to an IPython notebook.
 #
 #  This is useful when you want to use nbconvert's preprocessors to operate on a
@@ -687,9 +718,9 @@ c.TemplateExporter.exclude_output = True
 #  See also: Exporter.preprocessors
 # c.NotebookExporter.preprocessors = []
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # PDFExporter(LatexExporter) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Writer designed to write to PDF files.
 #
 #  This inherits from `LatexExporter`. It creates a LaTeX file in a temporary
@@ -788,9 +819,9 @@ c.TemplateExporter.exclude_output = True
 #  Default: False
 # c.PDFExporter.verbose = False
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # PythonExporter(TemplateExporter) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Exports a Python code file. Note that the file produced will have a shebang of
 #  '#!/usr/bin/env python' regardless of the actual python version used in the
 #  notebook.
@@ -872,9 +903,9 @@ c.TemplateExporter.exclude_output = True
 #  See also: TemplateExporter.template_paths
 # c.PythonExporter.template_paths = ['.']
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # RSTExporter(TemplateExporter) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Exports reStructuredText documents.
 
 ## List of preprocessors available by default, by name, namespace,
@@ -954,9 +985,9 @@ c.TemplateExporter.exclude_output = True
 #  See also: TemplateExporter.template_paths
 # c.RSTExporter.template_paths = ['.']
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # ScriptExporter(TemplateExporter) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## List of preprocessors available by default, by name, namespace,
 #  See also: Exporter.default_preprocessors
 # c.ScriptExporter.default_preprocessors = ['nbconvert.preprocessors.TagRemovePreprocessor', 'nbconvert.preprocessors.RegexRemovePreprocessor', 'nbconvert.preprocessors.ClearOutputPreprocessor', 'nbconvert.preprocessors.ExecutePreprocessor', 'nbconvert.preprocessors.coalesce_streams', 'nbconvert.preprocessors.SVG2PDFPreprocessor', 'nbconvert.preprocessors.LatexPreprocessor', 'nbconvert.preprocessors.HighlightMagicsPreprocessor', 'nbconvert.preprocessors.ExtractOutputPreprocessor', 'nbconvert.preprocessors.ClearMetadataPreprocessor']
@@ -1034,9 +1065,9 @@ c.TemplateExporter.exclude_output = True
 #  See also: TemplateExporter.template_paths
 # c.ScriptExporter.template_paths = ['.']
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # SlidesExporter(HTMLExporter) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Exports HTML slides with reveal.js
 
 ## The text used as the text for anchor links.
@@ -1178,9 +1209,9 @@ c.TemplateExporter.exclude_output = True
 #  See also: HTMLExporter.theme
 # c.SlidesExporter.theme = 'light'
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # WebPDFExporter(HTMLExporter) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Writer designed to write to PDF files.
 #
 #  This inherits from :class:`HTMLExporter`. It creates the HTML using the
@@ -1288,9 +1319,9 @@ c.TemplateExporter.exclude_output = True
 #  See also: HTMLExporter.theme
 # c.WebPDFExporter.theme = 'light'
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Preprocessor(NbConvertBase) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## A configurable preprocessor
 #
 #  Inherit from this class if you wish to have configurability for your
@@ -1318,9 +1349,9 @@ c.TemplateExporter.exclude_output = True
 #  Default: False
 # c.Preprocessor.enabled = False
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # CSSHTMLHeaderPreprocessor(Preprocessor) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Preprocessor used to pre-process notebook for HTML output.  Adds IPython
 #  notebook front-end CSS and Pygments CSS to HTML output.
 
@@ -1344,9 +1375,9 @@ c.TemplateExporter.exclude_output = True
 #  Default: <class 'jupyterlab_pygments.style.JupyterStyle'>
 # c.CSSHTMLHeaderPreprocessor.style = <class 'jupyterlab_pygments.style.JupyterStyle'>
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # ClearMetadataPreprocessor(Preprocessor) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Removes all the metadata from all code cells in a notebook.
 
 ## Flag to choose if cell metadata is to be cleared in addition to notebook
@@ -1383,9 +1414,9 @@ c.TemplateExporter.exclude_output = True
 #  Default: {('language_info', 'name')}
 # c.ClearMetadataPreprocessor.preserve_nb_metadata_mask = {('language_info', 'name')}
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # ClearOutputPreprocessor(Preprocessor) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Removes the output from all code cells in a notebook.
 
 ## Deprecated default highlight language as of 5.0, please use language_info
@@ -1403,9 +1434,9 @@ c.TemplateExporter.exclude_output = True
 #  Default: {'collapsed', 'scrolled'}
 # c.ClearOutputPreprocessor.remove_metadata_fields = {'collapsed', 'scrolled'}
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # ConvertFiguresPreprocessor(Preprocessor) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Converts all of the outputs in a notebook from one format to another.
 
 ## Deprecated default highlight language as of 5.0, please use language_info
@@ -1428,9 +1459,9 @@ c.TemplateExporter.exclude_output = True
 #  Default: ''
 # c.ConvertFiguresPreprocessor.to_format = ''
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # NotebookClient(LoggingConfigurable) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Encompasses a Client for executing cells in a notebook
 
 ## If ``False`` (default), when a cell raises an error the execution is stopped
@@ -1547,9 +1578,9 @@ c.TemplateExporter.exclude_output = True
 #  Default: None
 # c.NotebookClient.timeout_func = None
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # ExecutePreprocessor(Preprocessor, NotebookClient) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Executes all the cells in a notebook
 
 ##
@@ -1627,9 +1658,9 @@ c.TemplateExporter.exclude_output = True
 #  See also: NotebookClient.timeout_func
 # c.ExecutePreprocessor.timeout_func = None
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # ExtractOutputPreprocessor(Preprocessor) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Extracts all of the outputs from the notebook file.  The extracted outputs are
 #  returned in the 'resources' dictionary.
 
@@ -1651,9 +1682,9 @@ c.TemplateExporter.exclude_output = True
 #  Default: '{unique_key}_{cell_index}_{index}{extension}'
 # c.ExtractOutputPreprocessor.output_filename_template = '{unique_key}_{cell_index}_{index}{extension}'
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # HighlightMagicsPreprocessor(Preprocessor) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Detects and tags code cells that use a different languages than Python.
 
 ## Deprecated default highlight language as of 5.0, please use language_info
@@ -1673,9 +1704,9 @@ c.TemplateExporter.exclude_output = True
 #  Default: {}
 # c.HighlightMagicsPreprocessor.languages = {}
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # LatexPreprocessor(Preprocessor) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Preprocessor for latex destined documents.
 #
 #  Mainly populates the ``latex`` key in the resources dict, adding definitions
@@ -1697,9 +1728,9 @@ c.TemplateExporter.exclude_output = True
 #  Default: 'default'
 # c.LatexPreprocessor.style = 'default'
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # RegexRemovePreprocessor(Preprocessor) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Removes cells from a notebook that match one or more regular expression.
 #
 #  For each cell, the preprocessor checks whether its contents match the regular
@@ -1738,9 +1769,9 @@ c.TemplateExporter.exclude_output = True
 #  Default: []
 # c.RegexRemovePreprocessor.patterns = []
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # SVG2PDFPreprocessor(ConvertFiguresPreprocessor) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Converts all of the outputs in a notebook from SVG to PDF.
 
 ## The command to use for converting SVG to PDF
@@ -1783,9 +1814,9 @@ c.TemplateExporter.exclude_output = True
 #  See also: ConvertFiguresPreprocessor.to_format
 # c.SVG2PDFPreprocessor.to_format = ''
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # TagRemovePreprocessor(Preprocessor) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Removes inputs, outputs, or cells from a notebook that have tags that
 #  designate they are to be removed prior to exporting the notebook.
 #
@@ -1838,9 +1869,9 @@ c.TemplateExporter.exclude_output = True
 #  Default: set()
 # c.TagRemovePreprocessor.remove_single_output_tags = set()
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # WriterBase(NbConvertBase) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Consumes output from nbconvert export...() methods and writes to a useful
 #  location.
 
@@ -1858,9 +1889,9 @@ c.TemplateExporter.exclude_output = True
 #  Default: []
 # c.WriterBase.files = []
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # DebugWriter(WriterBase) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Consumes output from nbconvert export...() methods and writes useful debugging
 #  information to the stdout.  The information includes a list of resources that
 #  were extracted from the notebook(s) during export.
@@ -1878,9 +1909,9 @@ c.TemplateExporter.exclude_output = True
 #  See also: WriterBase.files
 # c.DebugWriter.files = []
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # FilesWriter(WriterBase) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Consumes nbconvert output and produces files.
 
 ## Directory to write output(s) to. Defaults to output to the directory of each
@@ -1910,9 +1941,9 @@ c.TemplateExporter.exclude_output = True
 #  Default: ''
 # c.FilesWriter.relpath = ''
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # StdoutWriter(WriterBase) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Consumes output from nbconvert export...() methods and writes to the  stdout
 #  stream.
 
@@ -1929,9 +1960,9 @@ c.TemplateExporter.exclude_output = True
 #  See also: WriterBase.files
 # c.StdoutWriter.files = []
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # PostProcessorBase(NbConvertBase) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Deprecated default highlight language as of 5.0, please use language_info
 #  metadata instead
 #  See also: NbConvertBase.default_language
@@ -1941,9 +1972,9 @@ c.TemplateExporter.exclude_output = True
 #  See also: NbConvertBase.display_data_priority
 # c.PostProcessorBase.display_data_priority = ['text/html', 'application/pdf', 'text/latex', 'image/svg+xml', 'image/png', 'image/jpeg', 'text/markdown', 'text/plain']
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # ServePostProcessor(PostProcessorBase) configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 ## Post processor designed to serve files
 #
 #  Proxies reveal.js requests to a CDN if no local reveal.js is present

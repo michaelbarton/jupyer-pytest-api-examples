@@ -5,7 +5,7 @@ jupyter:
     text_representation:
       extension: .md
       format_name: markdown
-      format_version: "1.2"
+      format_version: '1.2'
       jupytext_version: 1.8.0
   kernelspec:
     display_name: Python 3
@@ -26,11 +26,9 @@ import _pytest
 
 ipytest.autoconfig()
 
-
 def check_input_file(input_file: pathlib.Path) -> None:
     if not input_file.is_file():
         raise FileNotFoundError("")
-
 
 def run_cli(input_file: pathlib.Path) -> None:
     """Helper to simulate running a cli tool."""
@@ -40,16 +38,28 @@ def run_cli(input_file: pathlib.Path) -> None:
         return 1
     return 0
 
-
-def long_running_computation():
+def long_running_computation() -> typing.Tuple[pathlib.Path, pathlib.Path]:
     """Helper method to generate some example pandas data"""
-    return pandas.DataFrame(
+
+    raw_collected_data = pandas.DataFrame(
         {
             "sample_id": [1, 1, 2, 2, 1, 1, 2, 2],
             "measurement": [0.1, 0.09, 2, 2.3, 5, 4.8, 7.2, 8.3],
             "test_variable": ["A", "A", "A", "A", "B", "B", "B", "B"],
         }
     )
+
+    # Here's the raw output
+    raw_data_file = tmp_path / "raw_data.csv"
+    raw_data_file.write_text(raw_collected_data.to_csv())
+
+    # Here's some computation on the raw output
+    averages_data_file = tmp_path / "sample_averages.csv"
+    averages_data_file.write_text(
+        raw_collected_data.groupby(["sample_id"]).agg("mean").to_csv()
+    )
+
+
 
 
 def fetch_file_from_s3() -> pathlib.Path:
@@ -59,9 +69,10 @@ def fetch_file_from_s3() -> pathlib.Path:
     return pathlib.Path(loc)
 ```
 
+
 I use pytest in most python projects, and I've had a feeling that I haven't been
 been using most of the features it provides, since I tend to only use
-`@pytest.mark` from the entire API. I spent some time reading through the pytest
+`@pytest.mark` from the API. I spent some time reading through the pytest
 documentation and playing with some examples in the source [pytest jupyter
 notebook][] to get more familiarity with what's possible. After a few hours of
 playing around with pytest, realised there was a lot of functionality I was
@@ -79,22 +90,22 @@ pytest][] GitHub repository.
 
 Fixtures are a large part of the pytest API, and the part I was least familiar
 with. Fixtures are used in pytest tests by including them as parameters to test
-functions. The pytest API comes with a few builtin fixtures, ones I like the
-most are `[tmp_path][]` and `[tmp_path_factory][]` demonstrated below.
+functions. The pytest API comes with a few builtin fixtures: useful ones for
+temporary files are `[tmp_path][]` and `[tmp_path_factory][]` shown below.
 
 [tmp_path_factory]:
   https://docs.pytest.org/en/stable/tmpdir.html#tmp-path-factory-example
 
-```python
+```python tags=["remove_output"]
 %%run_pytest[clean] -qq -s --cache-clear
 
 def test_with_tmp_path(tmp_path: pathlib.Path):
     """The `tmp_path` fixture provides a temporary directory."""
-    assert tmp_path.isdir()
+    assert tmp_path.is_dir()
 
 def test_with_tmp_path_factory(tmp_path_factory: pytest.TempPathFactory):
     """The `tmp_path_factory` fixture provides a factory for directories."""
-    assert tmp_path_factory.mktemp("temp_dir").isdir()
+    assert tmp_path_factory.mktemp("temp_dir").is_dir()
 
 ```
 
@@ -131,6 +142,7 @@ def test_fixture_teardown_1(example_data_file_with_teardown: pathlib.Path):
 def test_fixture_teardown_2(example_data_file_with_teardown: pathlib.Path):
     assert example_data_file_with_teardown.exists()
 ```
+
 
 ## Scoping fixtures
 
@@ -173,6 +185,7 @@ def test_fixture_session_teardown_2(example_data_file_for_session: pathlib.Path)
     assert example_data_file_for_session.exists()
 ```
 
+
 ## Parameterising fixtures
 
 If you find yourself using the same `pytest.mark.parametrize` multiple times in
@@ -191,36 +204,30 @@ def invalid_file(request) -> pathlib.Path:
 def test_file_1(invalid_file):
     with pytest.raises(FileNotFoundError):
         check_input_file(invalid_file)
-    print("Test passes checking for input file: {}".format(invalid_file))
+    print("Unit test passes checking for input file: {}".format(invalid_file))
 
 
 def test_cli_app(invalid_file):
     assert run_cli(invalid_file) == 1
-    print("Test passes checking for input file: {}".format(invalid_file))
+    print("CLI test passes checking for file: {}".format(invalid_file))
 ```
 
-## Break up long serial tests
 
-```python
+## Break up expensive serial tests
+
+There can be scenarios in end to end tests where it's necessary to test the
+output artifact with multiple assertions. An example of this might be:
+
+```python tags=["remove_output"]
 %%run_pytest[clean] -qq -s --cache-clear
 
 
 def test_long_e2e_test(tmp_path: pathlib.Path):
     """Long running e2e test."""
 
-    # Assume this data was generated from an expensive computation that takes a few minutes
-    # to run each time.
-    raw_collected_data = long_running_computation()
-
-    # Here's the raw output
-    raw_data_file = tmp_path / "raw_data.csv"
-    raw_data_file.write_text(raw_collected_data.to_csv())
-
-    # Here's some computation on the raw output
-    averages_data_file = tmp_path / "sample_averages.csv"
-    averages_data_file.write_text(
-        raw_collected_data.groupby(["sample_id"]).agg("mean").to_csv()
-    )
+    # Assume this data was generated from an expensive computation that takes a few
+    # minutes to run each time.
+    raw_data_file, averages_data_file = long_running_computation()
 
     # If these tests fail ...
     assert raw_data_file.exists()
@@ -232,13 +239,14 @@ def test_long_e2e_test(tmp_path: pathlib.Path):
     assert averages_data_file.read_text()
 ```
 
+
 A problem with test structure above is that running a lot of tests in serial
 means the later tests won't execute if any of the earlier ones fail which can
 require running the same tests multiple times until all the serial tests
 execute. These can instead be rewritten to take advantage of fixtures and still
 run all the tests even if some fail
 
-```python
+```python tags=["remove_output"]
 %%run_pytest[clean] -qq -s --cache-clear
 
 
@@ -284,13 +292,14 @@ def test_averates_data_file(computation_data: typing.Dict[str, pathlib.Path]):
     assert averages_file.read_text()
 ```
 
+
 ## Use LineMatcher for testing large text
 
 The `LineMatcher` helper class provides methods that can reduce boiler plate
 testing large blocks of text.
 
-```python
-%%run_pytest[clean] -qq -s --cache-clear
+```python tags=["remove_output"]
+%%run_pytest[clean] -qq -s --quiet
 
 
 def test_large_text():
@@ -310,11 +319,12 @@ def test_large_text():
     matcher.fnmatch_lines_random(["Two roads diverged in a yellow wood,"])
 
     # Check lines exist with a regex
-    matcher.fnmatch_lines_random(["Two roads diverged in a .* wood,"])
+    matcher.re_match_lines_random(["Two roads diverged in a .* wood,"])
 
     # Check lines don't exist with a regex
-    matcher.no_fnmatch_line(["And looked down two as far as I could"])
+    matcher.no_fnmatch_line("And looked down two as far as I could")
 ```
+
 
 ## Caching large files or computation
 
@@ -339,7 +349,7 @@ strings to serialise into the cache.
 %%run_pytest[clean] -qq -s --cache-clear
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def example_data_file(pytestconfig: _pytest.config.Config) -> pathlib.Path:
     """Fetch and cache a large file from s3.
 
@@ -360,10 +370,12 @@ def example_data_file(pytestconfig: _pytest.config.Config) -> pathlib.Path:
 
 def test_file_1(example_data_file: pathlib.Path):
     """This test will use the non-cached version."""
+    print("Running test 1")
     assert example_data_file.exists()
 
 
 def test_file_2(example_data_file: pathlib.Path):
     """Second time around this will use the cached version."""
+    print("Running test 2")
     assert example_data_file.exists()
 ```
