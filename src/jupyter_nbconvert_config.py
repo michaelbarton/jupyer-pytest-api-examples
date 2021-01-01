@@ -57,13 +57,15 @@ class AddArticleMetadata(base.Preprocessor):
             {
                 "metadata": {},
                 "cell_type": "markdown",
-                "source": textwrap.dedent(f"""\
+                "source": textwrap.dedent(
+                    f"""\
                     ---
                     "kind": "article"
                     "date": "{metadata["date"]}"
                     "title": "{metadata["title"]}"
                     ---
-                """)
+                """
+                ),
             }
         )
 
