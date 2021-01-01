@@ -54,7 +54,7 @@ class AddArticleMetadata(base.Preprocessor):
     ) -> typing.Tuple[nbformat.NotebookNode, typing.Dict[str, typing.Any]]:
         """Add article frontmatter YAML."""
         metadata = io.StringIO()
-        yaml.dump(dict(notebook["metadata"]["blog"]), metadata)
+        yaml.dump(dict(notebook["metadata"]["blog"]), metadata, indent=4)
         metadata.seek(0)
 
         node = nbformat.from_dict(

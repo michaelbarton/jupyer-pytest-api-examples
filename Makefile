@@ -11,6 +11,7 @@ ${BUILD}: ${NOTEBOOK} src/jupyter_nbconvert_config.py sync
 		--config=src/jupyter_nbconvert_config.py \
 		--stdout \
 		$< \
+		| sed 's/```/~~~ /' \
 		> $@
 
 
