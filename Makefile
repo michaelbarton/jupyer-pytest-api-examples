@@ -13,6 +13,7 @@ ${BUILD}: ${NOTEBOOK} src/jupyter_nbconvert_config.py sync
 		$< \
 		> $@
 
+
 sync: fmt
 	poetry run jupytext --sync ${NOTEBOOK}
 
