@@ -94,7 +94,7 @@ the pytest documentation there's useful videos, and plugins listed on the
 ## Pytest Fixtures
 
 Fixtures are a large part of the pytest API, and the part I was least familiar
-with. Fixtures are included in test fuction by adding them as parameters to the
+with. Fixtures are included in test function by adding them as parameters to the
 function. The pytest API comes with a few builtin fixtures: useful ones for
 temporary files are [tmp_path][] and [tmp_path_factory][] shown below.
 
@@ -305,7 +305,7 @@ def test_averates_data_file(computation_data: typing.Dict[str, pathlib.Path]):
 
 The `LineMatcher` helper class provides methods that can reduce boiler plate
 testing large blocks of text. This provides methods for testing presence and
-absense of lines.
+absence of lines.
 
 ```python tags=["remove_output"]
 %%run_pytest[clean] -qq -s --quiet
@@ -339,7 +339,7 @@ def test_large_text():
 
 Documentation: [Cache config][cache]
 
-Pytest provides a cache that can be used for expensived operations between test
+Pytest provides a cache that can be used for expensive operations between test
 runs such as large computations or fetching large data. This can used prevent
 expensive computations from slowing down tests. The cache can be cleared using
 the command line flag: `pytest --cache-clear`.
