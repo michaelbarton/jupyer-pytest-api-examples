@@ -32,4 +32,4 @@ fmt: ${NOTEBOOK}
 			--prose-wrap always
 
 clean:
-	rm -r out
+	rm -r ${BUILD}
