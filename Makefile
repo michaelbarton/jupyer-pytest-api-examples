@@ -1,7 +1,7 @@
 # Makefile to convert notebook into a blog post
 
 NOTEBOOK = src/pytest_api_examples.ipynb
-BUILD = blog/source/content/tools/pytest-examples.mkd
+BUILD = blog/source/content/tools/pytest-api-examples.mkd
 
 build: ${BUILD}
 

@@ -1,15 +1,13 @@
 import re
 import rich
+import textwrap
 import typing
 
 from nbconvert.preprocessors import base
 from rich import traceback
-from ruamel.yaml import YAML
 import io
 import nbformat
 import rich
-
-yaml = YAML(typ="safe")
 
 traceback.install()
 
@@ -53,15 +51,19 @@ class AddArticleMetadata(base.Preprocessor):
         self, notebook: nbformat.NotebookNode, resources: typing.Dict[str, typing.Any]
     ) -> typing.Tuple[nbformat.NotebookNode, typing.Dict[str, typing.Any]]:
         """Add article frontmatter YAML."""
-        metadata = io.StringIO()
-        yaml.dump(dict(notebook["metadata"]["blog"]), metadata, indent=4)
-        metadata.seek(0)
+        metadata = dict(notebook["metadata"]["blog"])
 
         node = nbformat.from_dict(
             {
                 "metadata": {},
                 "cell_type": "markdown",
-                "source": "\n".join(["---", metadata.read(), "---"]),
+                "source": textwrap.dedent(f"""\
+                    ---
+                    "kind": "article"
+                    "date": "{metadata["date"]}"
+                    "title": "{metadata["title"]}"
+                    ---
+                """)
             }
         )
 

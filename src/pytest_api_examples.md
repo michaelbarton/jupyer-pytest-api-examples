@@ -78,13 +78,13 @@ def fetch_file_from_s3() -> pathlib.Path:
 I use pytest in most python projects, and I've had a feeling that I haven't been
 been using most of the features it provides, since I tend to only use
 `@pytest.mark` from the API. I spent some time reading through the pytest
-documentation and playing with some examples in the source [pytest jupyter
-notebook][] to get more familiarity with what's possible. After a few hours of
-playing around with pytest, realised there was a lot of functionality I was
-missing. Read below for some of the examples. Most of this is just a
-reconstitution of whats in the [pytest documentation][] for my own
-self-learning. Additionally there's useful videos, and plugins on the [awesome
-pytest][] GitHub repository.
+documentation and playing with some examples in a [pytest jupyter notebook][] to
+get more familiarity with what's possible. After a few hours of playing around
+with pytest, realised there pytest has much more functionality than I had been.
+Read below for some of the examples. Most of this article is a reconstitution of
+what's in the [pytest documentation][] for my own self-learning. In addition to
+the pytest documentation there's useful videos, and plugins listed on the
+[awesome pytest][] GitHub repository.
 
 [pytest jupyter notebook]:
   https://github.com/michaelbarton/jupyer-pytest-api-examples
@@ -94,9 +94,9 @@ pytest][] GitHub repository.
 ## Pytest Fixtures
 
 Fixtures are a large part of the pytest API, and the part I was least familiar
-with. Fixtures are used in pytest tests by including them as parameters to test
-functions. The pytest API comes with a few builtin fixtures: useful ones for
-temporary files are `[tmp_path][]` and `[tmp_path_factory][]` shown below.
+with. Fixtures are included in test fuction by adding them as parameters to the
+function. The pytest API comes with a few builtin fixtures: useful ones for
+temporary files are [tmp_path][] and [tmp_path_factory][] shown below.
 
 [tmp_path_factory]:
   https://docs.pytest.org/en/stable/tmpdir.html#tmp-path-factory-example
@@ -118,9 +118,10 @@ def test_with_tmp_path_factory(tmp_path_factory: pytest.TempPathFactory):
 
 Documentation: [pytest fixture][], [fixture finalization][]
 
-If you want to do clean up on the fixture after it's used, you can use `yield`
-instead of `return`. The fixture will then run the code defined after the
-`yield` statement, after the fixture-using test returns.
+If you want to perform clean up on a fixture after it has been used, you can use
+`yield` instead of `return` when creating a custom fixture function. The fixture
+will then run the code defined after the `yield` statement, after the
+fixture-using test returns.
 
 [fixture finalization]:
   https://docs.pytest.org/en/latest/fixture.html#teardown-cleanup-aka-fixture-finalization
@@ -193,8 +194,8 @@ def test_fixture_session_teardown_2(example_data_file_for_session: pathlib.Path)
 
 ## Parameterising fixtures
 
-If you find yourself using the same `pytest.mark.parametrize` multiple times in
-your tests, this can be refactored into a fixture using
+If you find yourself using the same `pytest.mark.parametrize` arguments multiple
+times in your tests, this can be refactored into a fixture using
 `pytest.fixture(params=...)`
 
 ```python
@@ -230,16 +231,17 @@ output artefact with multiple assertions. An example of this might be:
 def test_long_e2e_test(tmp_path: pathlib.Path):
     """Long running e2e test."""
 
-    # Assume this data was generated from an expensive computation that takes a few
-    # minutes to run each time.
+    # Assume this data was generated from an expensive computation that takes a
+		# few minutes to run each time.
     raw_data_file, averages_data_file = long_running_computation()
 
     # If these tests fail ...
     assert raw_data_file.exists()
     assert raw_data_file.read_text()
 
-    # ... these won't be executed.
-    # Which can be brittle and need multiple iterations before all assertions are run.
+    # ... these then won't be executed.
+    # Which can be brittle and need multiple run-fix cycles before all assertions
+		# are passing.
     assert averages_data_file.exists()
     assert averages_data_file.read_text()
 ```
@@ -249,7 +251,8 @@ A problem with test structure above is that running a lot of tests in serial
 means the later tests won't execute if any of the earlier ones fail which can
 require running the same tests multiple times until all the serial tests
 execute. These can instead be rewritten to take advantage of fixtures and still
-run all the tests even if some fail
+run all the tests even if some them fail. This should lead to shorter testing
+cycles.
 
 ```python tags=["remove_output"]
 %%run_pytest[clean] -qq -s --cache-clear
@@ -301,7 +304,8 @@ def test_averates_data_file(computation_data: typing.Dict[str, pathlib.Path]):
 ## Use LineMatcher for testing large text
 
 The `LineMatcher` helper class provides methods that can reduce boiler plate
-testing large blocks of text.
+testing large blocks of text. This provides methods for testing presence and
+absense of lines.
 
 ```python tags=["remove_output"]
 %%run_pytest[clean] -qq -s --quiet
@@ -331,14 +335,14 @@ def test_large_text():
 ```
 
 
-## Caching large files or computation
+## Caching large files or computations
 
 Documentation: [Cache config][cache]
 
-Pytest allows caching expensive operations between test runs such as large
-computation or fetching data. This can used prevent expensive computations from
-slowing down tests. The cache can be cleared using the flag:
-`pytest --cache-clear`.
+Pytest provides a cache that can be used for expensived operations between test
+runs such as large computations or fetching large data. This can used prevent
+expensive computations from slowing down tests. The cache can be cleared using
+the command line flag: `pytest --cache-clear`.
 
 To access the cache the `pytestconfig` fixture needs to be in arguments to a
 fixture, this will be an instance of [`_pytest.config.Config`][config_class].
