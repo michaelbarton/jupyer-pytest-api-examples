@@ -80,11 +80,11 @@ been using most of the features it provides, since I tend to only use
 `@pytest.mark` from the API. I spent some time reading through the pytest
 documentation and playing with some examples in a [pytest jupyter notebook][] to
 get more familiarity with what's possible. After a few hours of playing around
-with pytest, realised there pytest has much more functionality than I had been.
-Read below for some of the examples. Most of this article is a reconstitution of
-what's in the [pytest documentation][] for my own self-learning. In addition to
-the pytest documentation there's useful videos, and plugins listed on the
-[awesome pytest][] GitHub repository.
+with pytest, realised there pytest has much more functionality than I had been
+using. Read below for some of the examples. Most of this article is a
+reconstitution of what's in the [pytest documentation][] for my own
+self-learning. In addition to the pytest documentation there's useful videos,
+and plugins listed on the [awesome pytest][] GitHub repository.
 
 [pytest jupyter notebook]:
   https://github.com/michaelbarton/jupyer-pytest-api-examples
@@ -158,13 +158,13 @@ Documentation: [scope sharing][]
   https://docs.pytest.org/en/latest/fixture.html#scope-sharing-fixtures-across-classes-modules-packages-or-session
 
 In the example above the code after the `yield` runs every time the fixture is
-used, this might be inappropriate if the fixture computationally expensive. An
-alternative to caching the result (described below), would be to set the scope
-of the fixture with `pytest.fixture(scope=...)`. For example
+used, this might be inappropriate if the fixture is computationally expensive.
+An alternative to caching the result (described below), would be to set the
+scope of the fixture with `pytest.fixture(scope=...)`. For example
 `pytest.fixture(scope="session")` will run only once for the entire pytest
-session. Possible values for `scope=...` are
-`["class", "module", "package", "session"]`. A `Callable` can also be passed
-which will be evaluated once, see [dynamic scope][].
+session. Possible values for `scope=...` are `["class", "module", "package",
+"session"]`. A `Callable` can also be passed which will be evaluated once, see
+[dynamic scope][].
 
 [dynamic scope]: https://docs.pytest.org/en/latest/fixture.html#dynamic-scope
 
@@ -347,7 +347,7 @@ the command line flag: `pytest --cache-clear`.
 To access the cache the `pytestconfig` fixture needs to be in arguments to a
 fixture, this will be an instance of [`_pytest.config.Config`][config_class].
 The caveat to using the `get/set` methods is they have to be JSON serialisable,
-so in the examples below I covert `pathlib.Path` objects back and forth to
+so in the examples below I convert `pathlib.Path` objects back and forth to
 strings to serialise into the cache.
 
 [cache]:
