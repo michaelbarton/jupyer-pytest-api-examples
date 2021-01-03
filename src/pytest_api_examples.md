@@ -91,7 +91,7 @@ import pytest
 
 
 def fetch_file_from_s3() -> pathlib.Path:
-    """Simulate fetching a very large file from s3 that takes a while to download."""
+    """Simulate fetching a very large file from s3."""
     print("Fetching a large file from S3.")
     _, loc = tempfile.mkstemp()
     return pathlib.Path(loc)
@@ -141,12 +141,6 @@ import tempfile
 import typing
 
 import pytest
-
-def fetch_file_from_s3() -> pathlib.Path:
-    """Simulate fetching a very large file from s3 that takes a while to download."""
-    print("Fetching a large file from S3.")
-    _, loc = tempfile.mkstemp()
-    return pathlib.Path(loc)
 
 
 @pytest.fixture(scope="session")
@@ -231,7 +225,9 @@ import typing
 
 import pandas
 
-def long_running_computation(tmp_path: pathlib.Path) -> typing.Tuple[pathlib.Path, pathlib.Path]:
+def long_running_computation(
+  tmp_path: pathlib.Path
+) -> typing.Tuple[pathlib.Path, pathlib.Path]:
     """An example function to simulate what might be a long running process."""
 
     raw_collected_data = pandas.DataFrame(
@@ -383,6 +379,7 @@ strings to serialise into the cache.
 ```python
 %%run_pytest[clean] -qq -s --cache-clear
 
+import pytest
 from _pytest import config
 
 
