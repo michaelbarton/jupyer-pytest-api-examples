@@ -19,72 +19,21 @@ jupyter:
 ---
 
 ```python tags=["remove_cell"]
-import pathlib
-import tempfile
-import typing
-import textwrap
-
-import pandas
-import pytest
 import ipytest
-import _pytest
-
 ipytest.autoconfig()
 
-def check_input_file(input_file: pathlib.Path) -> None:
-    if not input_file.is_file():
-        raise FileNotFoundError("")
-
-def run_cli(input_file: pathlib.Path) -> None:
-    """Helper to simulate running a cli tool."""
-    try:
-        check_input_file(input_file)
-    except FileNotFoundError:
-        return 1
-    return 0
-
-def long_running_computation() -> typing.Tuple[pathlib.Path, pathlib.Path]:
-    """Helper method to generate some example pandas data"""
-
-    raw_collected_data = pandas.DataFrame(
-        {
-            "sample_id": [1, 1, 2, 2, 1, 1, 2, 2],
-            "measurement": [0.1, 0.09, 2, 2.3, 5, 4.8, 7.2, 8.3],
-            "test_variable": ["A", "A", "A", "A", "B", "B", "B", "B"],
-        }
-    )
-
-    # Here's the raw output
-    raw_data_file = tmp_path / "raw_data.csv"
-    raw_data_file.write_text(raw_collected_data.to_csv())
-
-    # Here's some computation on the raw output
-    averages_data_file = tmp_path / "sample_averages.csv"
-    averages_data_file.write_text(
-        raw_collected_data.groupby(["sample_id"]).agg("mean").to_csv()
-    )
-
-
-
-
-def fetch_file_from_s3() -> pathlib.Path:
-    """Simulate fetching a very large file from s3 that takes a while to download."""
-    print("Fetching a large file from S3.")
-    _, loc = tempfile.mkstemp()
-    return pathlib.Path(loc)
 ```
-
 
 I use pytest in most python projects, and I've had a feeling that I haven't been
 been using most of the features it provides, since I tend to only use
 `@pytest.mark` from the API. I spent some time reading through the pytest
 documentation and playing with some examples in a [pytest jupyter notebook][] to
 get more familiarity with what's possible. After a few hours of playing around
-with pytest, realised there pytest has much more functionality than I had been.
-Read below for some of the examples. Most of this article is a reconstitution of
-what's in the [pytest documentation][] for my own self-learning. In addition to
-the pytest documentation there's useful videos, and plugins listed on the
-[awesome pytest][] GitHub repository.
+with pytest, realised there pytest has much more functionality than I had been
+using. Read below for some of the examples. Most of this article is a
+reconstitution of what's in the [pytest documentation][] for my own
+self-learning. In addition to the pytest documentation there's useful videos,
+and plugins listed on the [awesome pytest][] GitHub repository.
 
 [pytest jupyter notebook]:
   https://github.com/michaelbarton/jupyer-pytest-api-examples
@@ -103,6 +52,10 @@ temporary files are [tmp_path][] and [tmp_path_factory][] shown below.
 
 ```python tags=["remove_output"]
 %%run_pytest[clean] -qq -s --cache-clear
+
+import pathlib
+
+import pytest
 
 def test_with_tmp_path(tmp_path: pathlib.Path):
     """The `tmp_path` fixture provides a temporary directory."""
@@ -131,6 +84,18 @@ fixture-using test returns.
 ```python
 %%run_pytest[clean] -qq -s --cache-clear
 
+import tempfile
+import typing
+
+import pytest
+
+
+def fetch_file_from_s3() -> pathlib.Path:
+    """Simulate fetching a very large file from s3."""
+    print("Fetching a large file from S3.")
+    _, loc = tempfile.mkstemp()
+    return pathlib.Path(loc)
+
 
 @pytest.fixture
 def example_data_file_with_teardown() -> typing.Generator[pathlib.Path, None, None]:
@@ -158,9 +123,9 @@ Documentation: [scope sharing][]
   https://docs.pytest.org/en/latest/fixture.html#scope-sharing-fixtures-across-classes-modules-packages-or-session
 
 In the example above the code after the `yield` runs every time the fixture is
-used, this might be inappropriate if the fixture computationally expensive. An
-alternative to caching the result (described below), would be to set the scope
-of the fixture with `pytest.fixture(scope=...)`. For example
+used, this might be inappropriate if the fixture is computationally expensive.
+An alternative to caching the result (described below), would be to set the
+scope of the fixture with `pytest.fixture(scope=...)`. For example
 `pytest.fixture(scope="session")` will run only once for the entire pytest
 session. Possible values for `scope=...` are
 `["class", "module", "package", "session"]`. A `Callable` can also be passed
@@ -170,6 +135,12 @@ which will be evaluated once, see [dynamic scope][].
 
 ```python
 %%run_pytest[clean] -qq -s --cache-clear
+
+import pathlib
+import tempfile
+import typing
+
+import pytest
 
 
 @pytest.fixture(scope="session")
@@ -201,13 +172,34 @@ times in your tests, this can be refactored into a fixture using
 ```python
 %%run_pytest[clean] -qq -s --cache-clear
 
+import pathlib
+import tempfile
+
+import pytest
+
+
+def check_input_file(input_file: pathlib.Path) -> None:
+    if not input_file.is_file():
+        """Helper function to test file existence."""
+        raise FileNotFoundError(f"File not found: {input_file.absolute()}")
+
+def run_cli(input_file: pathlib.Path) -> None:
+    """Simulate running a cli tool."""
+    try:
+        check_input_file(input_file)
+    except FileNotFoundError:
+        return 1
+    return 0
+
+
 
 @pytest.fixture(params=["", tempfile.mkdtemp(), "/non_existing_file"])
 def invalid_file(request) -> pathlib.Path:
     return pathlib.Path(request.param)
 
 
-def test_file_1(invalid_file):
+def test_check_input_file(invalid_file):
+    ""
     with pytest.raises(FileNotFoundError):
         check_input_file(invalid_file)
     print("Unit test passes checking for input file: {}".format(invalid_file))
@@ -227,13 +219,44 @@ output artefact with multiple assertions. An example of this might be:
 ```python tags=["remove_output"]
 %%run_pytest[clean] -qq -s --cache-clear
 
+import pathlib
+import tempfile
+import typing
+
+import pandas
+
+def long_running_computation(
+  tmp_path: pathlib.Path
+) -> typing.Tuple[pathlib.Path, pathlib.Path]:
+    """An example function to simulate what might be a long running process."""
+
+    raw_collected_data = pandas.DataFrame(
+        {
+            "sample_id": [1, 1, 2, 2, 1, 1, 2, 2],
+            "measurement": [0.1, 0.09, 2, 2.3, 5, 4.8, 7.2, 8.3],
+            "test_variable": ["A", "A", "A", "A", "B", "B", "B", "B"],
+        }
+    )
+
+    # Here's the raw output
+    raw_data_file = tmp_path / "raw_data.csv"
+    raw_data_file.write_text(raw_collected_data.to_csv())
+
+    # Here's some computation on the raw output
+    averages_data_file = tmp_path / "sample_averages.csv"
+    averages_data_file.write_text(
+        raw_collected_data.groupby(["sample_id"]).agg("mean").to_csv()
+    )
+
+    return raw_data_file, averages_data_file
+
 
 def test_long_e2e_test(tmp_path: pathlib.Path):
     """Long running e2e test."""
 
     # Assume this data was generated from an expensive computation that takes a
-		# few minutes to run each time.
-    raw_data_file, averages_data_file = long_running_computation()
+    # few minutes to run each time.
+    raw_data_file, averages_data_file = long_running_computation(tmp_path)
 
     # If these tests fail ...
     assert raw_data_file.exists()
@@ -241,7 +264,7 @@ def test_long_e2e_test(tmp_path: pathlib.Path):
 
     # ... these then won't be executed.
     # Which can be brittle and need multiple run-fix cycles before all assertions
-		# are passing.
+    # are passing.
     assert averages_data_file.exists()
     assert averages_data_file.read_text()
 ```
@@ -257,6 +280,8 @@ cycles.
 ```python tags=["remove_output"]
 %%run_pytest[clean] -qq -s --cache-clear
 
+import pytest
+import pathlib
 
 # Move the long running code into a fixture and make sure it runs only once per
 # testing session
@@ -264,20 +289,13 @@ cycles.
 def computation_data(
     tmp_path_factory: pytest.TempPathFactory,
 ) -> typing.Dict[str, pathlib.Path]:
-    # This data was generated by a long compuation.
-    raw_collected_data = long_running_computation()
 
     # tmp_path_factory is a fixture provided by pytest:
     # https://docs.pytest.org/en/stable/tmpdir.html#tmp-path-factory-example
     tmp_path = tmp_path_factory.mktemp("e2e_test")
 
-    # Same generated output files
-    raw_file = tmp_path / "raw_data.csv"
-    raw_file.write_text(raw_collected_data.to_csv())
-    averages_file = tmp_path / "sample_averages.csv"
-    averages_file.write_text(
-        raw_collected_data.groupby(["sample_id"]).agg("mean").to_csv()
-    )
+    # This data was generated by a long compuation.
+    raw_file, averages_file = long_running_computation(tmp_path)
 
     # Return the files for testing.
     return {"raw": raw_file, "averages": averages_file}
@@ -310,6 +328,10 @@ absence of lines.
 ```python tags=["remove_output"]
 %%run_pytest[clean] -qq -s --quiet
 
+import textwrap
+
+from _pytest import pytester
+
 
 def test_large_text():
     example_text = textwrap.dedent(
@@ -322,9 +344,9 @@ def test_large_text():
     """
     )
 
-    matcher = _pytest.pytester.LineMatcher(example_text.splitlines())
+    matcher = pytester.LineMatcher(example_text.splitlines())
 
-    # Check some lines at random
+    # Check some lines exist in the text
     matcher.fnmatch_lines_random(["Two roads diverged in a yellow wood,"])
 
     # Check lines exist with a regex
@@ -347,7 +369,7 @@ the command line flag: `pytest --cache-clear`.
 To access the cache the `pytestconfig` fixture needs to be in arguments to a
 fixture, this will be an instance of [`_pytest.config.Config`][config_class].
 The caveat to using the `get/set` methods is they have to be JSON serialisable,
-so in the examples below I covert `pathlib.Path` objects back and forth to
+so in the examples below I convert `pathlib.Path` objects back and forth to
 strings to serialise into the cache.
 
 [cache]:
@@ -357,9 +379,12 @@ strings to serialise into the cache.
 ```python
 %%run_pytest[clean] -qq -s --cache-clear
 
+import pytest
+from _pytest import config
+
 
 @pytest.fixture
-def example_data_file(pytestconfig: _pytest.config.Config) -> pathlib.Path:
+def example_data_file(pytestconfig: config.Config) -> pathlib.Path:
     """Fetch and cache a large file from s3.
 
     Notes:
