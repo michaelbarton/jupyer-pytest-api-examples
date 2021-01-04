@@ -49,6 +49,7 @@ temporary files are [tmp_path][] and [tmp_path_factory][] shown below.
 
 [tmp_path_factory]:
   https://docs.pytest.org/en/stable/tmpdir.html#tmp-path-factory-example
+[tmp_path]: https://docs.pytest.org/en/stable/tmpdir.html#the-tmpdir-fixture
 
 ```python tags=["remove_output"]
 %%run_pytest[clean] -qq -s --cache-clear
