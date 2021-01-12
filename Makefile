@@ -11,6 +11,9 @@ ${BUILD}: ${NOTEBOOK} src/jupyter_nbconvert_config.py fmt
 		$< \
 		> $@
 
+up:
+	poetry run jupyter-notebook ${NOTEBOOK}
+
 bootstrap:
 	poetry install
 
