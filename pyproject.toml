@@ -17,6 +17,8 @@ pandas = "^1.2.0"
 pytest = "^6.2.1"
 python = "^3.8"
 rich = "^9.6.0"
+numpy = "^1.19.5"
+seaborn = "^0.11.1"
 
 [tool.poetry.dev-dependencies]
 
