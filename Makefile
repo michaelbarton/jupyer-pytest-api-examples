@@ -21,7 +21,7 @@ preview: ${BUILD}
 	poetry run python -m rich.markdown $<
 
 fmt: ${NOTEBOOK}
-	poetry run blacken-docs $<
+	poetry run blacken-docs $< || true
 	docker-compose run --rm prettier \
 		npx prettier \
 			--write "/mnt/*.md" \
